@@ -1,5 +1,5 @@
 import { createClient } from "@supabase/supabase-js";
-const supabaseUrl = "https://ruvbjnpswgeblgintkmg.supabase.co";
+export const supabaseUrl = "https://ruvbjnpswgeblgintkmg.supabase.co";
 
 //The anon key in the api settings
 const supabaseKey =

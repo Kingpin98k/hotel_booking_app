@@ -1,8 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
 import styled from "styled-components";
-import { getCabins } from "../../services/apiCabins";
 import Spinner from "../../ui/Spinner";
 import CabinRow from "./CabinRow";
+import { useCabins } from "./useCabins";
 
 const Table = styled.div`
 	border: 1px solid var(--color-grey-200);
@@ -29,23 +28,9 @@ const TableHeader = styled.header`
 `;
 
 function CabinTable() {
+	const { isLoading, cabins } = useCabins();
+
 	//Querying for remote state using react-query
-
-	//useQuery hook
-	const {
-		isLoading,
-		data: cabins,
-		error,
-	} = useQuery({
-		//uniquely identifies the query data
-		queryKey: ["cabins"],
-
-		//queryFn is a function that "should return a Promise"
-		queryFn: () => {
-			//This data will get stored in the cache
-			return getCabins();
-		},
-	});
 
 	if (isLoading) return <Spinner />;
 

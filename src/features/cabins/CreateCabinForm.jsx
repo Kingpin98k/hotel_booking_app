@@ -6,10 +6,9 @@ import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Textarea from "../../ui/Textarea";
 import { useForm } from "react-hook-form";
-import { createCabin } from "../../services/apiCabins";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import toast from "react-hot-toast";
 import FormRow from "../../ui/FormRow";
+import { useCreateCabin } from "./useCreateCabin";
+import { useUpdateCabin } from "./useUpdateCabin";
 
 const Label = styled.label`
 	font-weight: 500;
@@ -20,38 +19,64 @@ const Error = styled.span`
 	color: var(--color-red-700);
 `;
 
-function CreateCabinForm() {
-	const queryClient = useQueryClient();
+//This is a custom component
+function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
+	const { isCreating, createCabin } = useCreateCabin();
+	const { isEditing, editCabin } = useUpdateCabin();
 
-	const { isLoading: isCreating, mutate } = useMutation({
-		mutationFn: (data) => createCabin(data),
-		onSuccess: () => {
-			toast.success("Cabin successfully created");
-			queryClient.invalidateQueries({
-				queryKey: ["cabins"],
-			});
-			reset();
-		},
-		onError: (error) => {
-			toast.error(error.message);
-		},
+	//cabinToEdit is an object that contains the data of the cabin to edit
+	const { id: editId, ...editValues } = cabinToEdit;
+
+	//This is a boolean that is true if we are editing a cabin
+	const isEditSession = Boolean(editId);
+
+	const { register, handleSubmit, reset, getValues, formState } = useForm({
+		defaultValues: isEditSession ? editValues : {},
 	});
 
-	const { register, handleSubmit, reset, getValues, formState } = useForm();
-
+	//This is the object that contains all the errors
 	const { errors } = formState;
-	console.log(errors);
+
+	//------------------//
+	//This is a boolean that is true if the form is submitting
+	const isWorking = isCreating || isEditing;
+	//------------------//
 
 	function onSubmit(data) {
-		mutate(data);
+		const image = typeof data.image === "string" ? data.image : data.image[0];
+
+		if (isEditSession) {
+			//we need id since we are editing a cabin and not creating one
+			editCabin(
+				{ newCabinData: { ...data, image: image }, id: editId },
+				{
+					onSuccess: () => {
+						//data is the cabin that was created
+						reset({ values: null });
+					},
+				}
+			);
+		} else {
+			createCabin(
+				{ ...data, image: data.image[0] },
+				{
+					onSuccess: () => {
+						reset();
+					},
+				}
+			);
+		}
 	}
 
-	// function onError(errors) {
-	// 	console.log(errors);
-	// }
+	function onError(errors) {
+		// console.log(errors);
+	}
 
 	return (
-		<Form onSubmit={handleSubmit(onSubmit)}>
+		<Form
+			onSubmit={handleSubmit(onSubmit, onError)}
+			type={onCloseModal ? "modal" : "regular"}
+		>
 			{/* <FormRow>
 				<Label htmlFor="name">Cabin name</Label>
 				<Input
@@ -65,7 +90,7 @@ function CreateCabinForm() {
 			</FormRow> */}
 			<FormRow label="Cabin name" error={errors?.name?.message}>
 				<Input
-					disabled={isCreating}
+					disabled={isWorking}
 					type="text"
 					id="name"
 					{...register("name", {
@@ -75,11 +100,12 @@ function CreateCabinForm() {
 			</FormRow>
 			<FormRow label="maxCapacity" error={errors?.maxCapacity?.message}>
 				<Input
-					disabled={isCreating}
+					disabled={isWorking}
 					type="number"
 					id="maxCapacity"
 					{...register("maxCapacity", {
 						required: "This field is required",
+						//These are the validation rules
 						min: {
 							value: 1,
 							message: "Minimum capacity is 1",
@@ -90,7 +116,7 @@ function CreateCabinForm() {
 
 			<FormRow label="Regular Price" error={errors?.regularPrice?.message}>
 				<Input
-					disabled={isCreating}
+					disabled={isWorking}
 					type="number"
 					id="regularPrice"
 					defaultValue={0}
@@ -116,8 +142,11 @@ function CreateCabinForm() {
 							value: 0,
 							message: "Minimum value is 1",
 						},
+						//This is a custom validation rule
 						validate: (value) => {
+							//value is the value of the input
 							if (parseInt(value) > parseInt(getValues().regularPrice)) {
+								//getValues() is a function that returns the values of all the inputs
 								return "Discount should be less than regular price";
 							}
 						},
@@ -130,7 +159,7 @@ function CreateCabinForm() {
 				error={errors?.description?.message}
 			>
 				<Textarea
-					disabled={isCreating}
+					disabled={isWorking}
 					type="number"
 					id="description"
 					defaultValue=""
@@ -142,7 +171,14 @@ function CreateCabinForm() {
 
 			<FormRow>
 				<Label htmlFor="image">Cabin photo</Label>
-				<FileInput disabled={isCreating} id="image" accept="image/*" />
+				{/* This is a custom component */}
+				<FileInput
+					disabled={isWorking}
+					type="file"
+					id="image"
+					accept="image/*"
+					{...register("image")}
+				/>
 			</FormRow>
 
 			<FormRow>
@@ -150,7 +186,7 @@ function CreateCabinForm() {
 				<Button variation="secondary" type="reset">
 					Cancel
 				</Button>
-				<Button disabled={isCreating}>Edit cabin</Button>
+				<Button disabled={isWorking}>Edit cabin</Button>
 			</FormRow>
 		</Form>
 	);
