@@ -1,11 +1,12 @@
 import styled from "styled-components";
 import { formatCurrency } from "../../utils/helpers";
-import { useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
-import CreateCabinForm from "./CreateCabinForm";
 import { useDeleteCabin } from "./useDeleteCabins";
 import { HiPencil, HiSquare2Stack, HiTrash } from "react-icons/hi2";
 import { useCreateCabin } from "./useCreateCabin";
+import Menus from "../../ui/Menus";
+import Modal from "../../ui/Modal";
+import CreateCabinForm from "./CreateCabinForm";
+import ConfirmDelete from "../../ui/ConfirmDelete";
 
 const TableRow = styled.div`
 	display: grid;
@@ -51,9 +52,6 @@ function CabinRow({ cabin }) {
 	const { isCreating, createCabin } = useCreateCabin();
 	const { isDeleting, deleteCabin } = useDeleteCabin();
 
-	//For the edit form
-	const [showForm, setShowForm] = useState(false);
-
 	const {
 		id: cabinId,
 		name,
@@ -75,9 +73,6 @@ function CabinRow({ cabin }) {
 		});
 	}
 
-	//QueryClient is used to invalidate the cache
-	const queryClient = useQueryClient();
-
 	return (
 		<>
 			<TableRow role="row">
@@ -87,18 +82,40 @@ function CabinRow({ cabin }) {
 				<Price>{formatCurrency(regularPrice)}</Price>
 				<Discount>{formatCurrency(discount)}%</Discount>
 				<div>
-					<button disabled={isCreating} onClick={() => handleDuplicate()}>
-						<HiSquare2Stack />
-					</button>
-					<button onClick={() => setShowForm((prev) => !prev)}>
-						<HiPencil />
-					</button>
-					<button onClick={() => deleteCabin(cabinId)} disabled={isDeleting}>
-						<HiTrash />
-					</button>
+					<Modal>
+						<Menus.Menu>
+							<Menus.Toggle id={cabinId} />
+							<Menus.List id={cabinId}>
+								<Menus.Button
+									icon={<HiSquare2Stack />}
+									onClick={handleDuplicate}
+								>
+									Duplicate
+								</Menus.Button>
+
+								<Modal.Open opens="edit">
+									<Menus.Button icon={<HiPencil />}>Edit</Menus.Button>
+								</Modal.Open>
+
+								<Modal.Open opens="delete">
+									<Menus.Button icon={<HiTrash />}>Delete</Menus.Button>
+								</Modal.Open>
+							</Menus.List>
+
+							<Modal.Window name="edit">
+								<CreateCabinForm cabinToEdit={cabin} />
+							</Modal.Window>
+							<Modal.Window name="delete">
+								<ConfirmDelete
+									resourceName={cabin.name}
+									onConfirm={() => deleteCabin(cabinId)}
+									disabled={isDeleting}
+								/>
+							</Modal.Window>
+						</Menus.Menu>
+					</Modal>
 				</div>
 			</TableRow>
-			{showForm && <CreateCabinForm cabinToEdit={cabin} />}
 		</>
 	);
 }

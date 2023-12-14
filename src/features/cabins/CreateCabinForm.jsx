@@ -22,7 +22,7 @@ const Error = styled.span`
 //This is a custom component
 function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 	const { isCreating, createCabin } = useCreateCabin();
-	const { isEditing, editCabin } = useUpdateCabin();
+	const { isUpdating, updateCabin } = useUpdateCabin();
 
 	//cabinToEdit is an object that contains the data of the cabin to edit
 	const { id: editId, ...editValues } = cabinToEdit;
@@ -39,7 +39,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
 	//------------------//
 	//This is a boolean that is true if the form is submitting
-	const isWorking = isCreating || isEditing;
+	const isWorking = isCreating || isUpdating;
 	//------------------//
 
 	function onSubmit(data) {
@@ -47,12 +47,13 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
 		if (isEditSession) {
 			//we need id since we are editing a cabin and not creating one
-			editCabin(
+			updateCabin(
 				{ newCabinData: { ...data, image: image }, id: editId },
 				{
 					onSuccess: () => {
 						//data is the cabin that was created
 						reset({ values: null });
+						onCloseModal?.();
 					},
 				}
 			);
@@ -62,6 +63,7 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 				{
 					onSuccess: () => {
 						reset();
+						onCloseModal?.();
 					},
 				}
 			);
@@ -183,7 +185,11 @@ function CreateCabinForm({ cabinToEdit = {}, onCloseModal }) {
 
 			<FormRow>
 				{/* type is an HTML attribute! */}
-				<Button variation="secondary" type="reset">
+				<Button
+					variation="secondary"
+					type="reset"
+					onClick={() => onCloseModal?.()}
+				>
 					Cancel
 				</Button>
 				<Button disabled={isWorking}>Edit cabin</Button>
