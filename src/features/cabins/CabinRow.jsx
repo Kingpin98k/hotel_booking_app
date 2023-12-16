@@ -7,6 +7,7 @@ import Menus from "../../ui/Menus";
 import Modal from "../../ui/Modal";
 import CreateCabinForm from "./CreateCabinForm";
 import ConfirmDelete from "../../ui/ConfirmDelete";
+import Table from "../../ui/Table";
 
 const TableRow = styled.div`
 	display: grid;
@@ -75,7 +76,7 @@ function CabinRow({ cabin }) {
 
 	return (
 		<>
-			<TableRow role="row">
+			<Table.Row>
 				<Img src={image} alt={name} />
 				<Cabin>{name}</Cabin>
 				<div>Fits up to {maxCapacity} guests</div>
@@ -115,7 +116,7 @@ function CabinRow({ cabin }) {
 						</Menus.Menu>
 					</Modal>
 				</div>
-			</TableRow>
+			</Table.Row>
 		</>
 	);
 }
