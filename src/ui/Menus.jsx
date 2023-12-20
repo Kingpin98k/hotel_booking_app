@@ -73,7 +73,6 @@ function Menus({ children }) {
 	const close = () => setOpenId("");
 	const open = (id) =>
 		setOpenId(() => {
-			console.log(id, "Was called");
 			return id;
 		});
 
