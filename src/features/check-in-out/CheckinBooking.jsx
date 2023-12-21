@@ -12,11 +12,9 @@ import { useBooking } from "../bookings/useBooking";
 import Spinner from "../../ui/Spinner";
 import { useEffect, useState } from "react";
 import Checkbox from "../../ui/Checkbox";
-import { add, set } from "date-fns";
 import { useCheckin } from "./useCheckin";
 import { useSettings } from "../settings/useSettings";
 import { formatCurrency } from "../../utils/helpers";
-import CheckoutButton from "./CheckoutButton";
 
 const Box = styled.div`
 	/* Box */

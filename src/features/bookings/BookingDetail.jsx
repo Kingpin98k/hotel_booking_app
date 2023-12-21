@@ -14,7 +14,6 @@ import Spinner from "../../ui/Spinner";
 import CheckoutButton from "../check-in-out/CheckoutButton";
 import Modal from "../../ui/Modal";
 import ConfirmDelete from "../../ui/ConfirmDelete";
-import { deleteBooking } from "../../services/apiBookings";
 import { useDeleteBooking } from "./useDeleteBooking";
 import Empty from "../../ui/Empty";
 
