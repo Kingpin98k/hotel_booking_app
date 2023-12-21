@@ -118,7 +118,7 @@ function App() {
 			{/* //This is the provider for react-query */}
 			<QueryClientProvider client={queryClient}>
 				{/* This is the devtools for react-query */}
-				<ReactQueryDevtools initialIsOpen={false} />
+				{/* <ReactQueryDevtools initialIsOpen={false} /> */}
 				<GlobalStyles />
 				<BrowserRouter>
 					<Routes>
